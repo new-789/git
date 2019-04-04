@@ -1,0 +1,146 @@
+{% extends 'rbac/base.html' %}
+
+
+{#{% block css %}#}
+{#{% endblock %}#}
+
+{% block title %}
+    登顶科技
+{% endblock %}
+
+
+
+{% block content %}
+    <!---- 待添加权限面板,action 后面的值用来确认是更新还是新增 ---->
+    <form method="post" action="?type=increase">
+        {% csrf_token %}
+        {{ increase_formset.management_form }}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <i class="fa fa-share-square-o" aria-hidden="true"></i>
+                待新建权限列表
+                <button class="btn btn-primary btn-xs pull-right"
+                        style="width: 60px; height: 25px; line-height: 25px">
+                    <i class="fa fa-save" aria-hidden="true"></i>
+                    &nbsp;保存
+                </button>
+            </div>
+            <div class="panel-body" style="color: palevioletred;">
+                注：路由系统自动发现的 URL 且数据库中不存在的 URL，请根据需要进行权限的添加
+            </div>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>名称</th>
+                    <th>URL</th>
+                    <th>别名</th>
+                    <th>所属菜单</th>
+                    <th>父权限</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for form in increase_formset %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        {% for field in form %}
+                            <td>
+                                {{ field }}
+                                <span style="color: red">{{ field.errors.0 }}</span>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+    <!------------------- 待删除权限面板-------------------->
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-share-square-o" aria-hidden="true"></i>
+            待删除权限列表
+            {#            <a class="btn btn-success btn-xs pull-right" href="#"#}
+            {#               style="width: 60px; height: 25px; line-height: 25px">#}
+            {#                <i class="fa fa-plus" aria-hidden="true"></i>#}
+            {#                &nbsp;新建#}
+            {#            </a>#}
+        </div>
+        <div class="panel-body" style="color: palevioletred;">
+            注：数据库中的 url 在路由系统中不存在可对其进行删除
+        </div>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>序号</th>
+                <th>名称</th>
+                <th>URL</th>
+                <th>别名</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in delete_row_list %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ row.title }}</td>
+                    <td>{{ row.url }}</td>
+                    <td>{{ row.url_alias }}</td>
+                    <td>
+                        <a class="fa fa-trash" href="{% url 'multi_permission_del' pid=row.pid %}"
+                           style="color: #d9534f"></a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <!---- 待更新权限面板，action 后面的值用来确认是更新还是新增 ---->
+    <form method="post" action="?type=update">
+        {% csrf_token %}
+        {{ update_formset.management_form }}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <i class="fa fa-share-square-o" aria-hidden="true"></i>
+                待更新权限列表
+                <button class="btn btn-primary btn-xs pull-right"
+                        style="width: 60px; height: 25px; line-height: 25px">
+                    <i class="fa fa-save" aria-hidden="true"></i>
+                    &nbsp;保存
+                </button>
+            </div>
+            <div class="panel-body" style="color: palevioletred;">
+                注：请根据路由系统中的 URL地址 正确修改 URL 及别名
+            </div>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>名称</th>
+                    <th>URL</th>
+                    <th>别名</th>
+                    <th>所属菜单</th>
+                    <th>父权限</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for form in update_formset %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        {% for field in form %}
+                            {% if forloop.first %}
+                                {{ field }}
+                            {% else %}
+                                <td>
+                                    {{ field }}
+                                    <span style="color: red">{{ field.errors.0 }}</span>
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+{% endblock %}

@@ -1,0 +1,12 @@
+
+<!-- crm 页面主体导航条渲染模板-->
+<ol class="breadcrumb no-radius no-margin" style="border-bottom: 1px solid #ccc">
+    {% for item in record_list %}
+        <!-- 判断如果 class 有值,表示为最后一个导航标签，则只创建 li 标签(即不让点击)-->
+        {% if item.class %}
+            <li class="{{ item.class }}">{{ item.title }}</li>
+        {% else %}
+            <li><a href="{{ item.url }}">{{ item.title }}</a></li>
+        {% endif %}
+    {% endfor %}
+</ol>

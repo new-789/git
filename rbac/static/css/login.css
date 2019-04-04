@@ -1,0 +1,39 @@
+
+body{
+    background-color: #ccc;
+}
+.navbar{
+    background-color: cornflowerblue;
+}
+.login_panel{
+    border-right: #bbb 1px solid;
+    border-top: #bbb 1px solid;
+    background-color: #fff;
+    border-left: #bbb 1px solid;
+    border-bottom: #bbb 1px solid;
+    text-align: left;
+    padding: 20px 30px 10px 30px;
+    width: 350px;
+    border-radius: 10px;
+}
+.login_panel > span{
+    padding-left: 35px;
+    font-size: 20px;
+    font-weight: bold;
+    color: darkorchid;
+}
+.login_input{
+    margin-top: 15px;
+}
+.login_btn{
+    width: 100px;
+    height: 30px;
+}
+#reg{
+    padding-top: 10px;
+}
+#error_info{
+    color: red;
+    font-size: 12px;
+    margin-top: -15px;
+}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../static/bs/bootstrap/css/bootstrap.css">
+    <style type="text/css">
+        #err_icon{
+            border-radius: 15px;
+        }
+        .d{
+            margin-top: 15px;
+            color: red;
+        }
+        #return{
+            width: 60px;
+            height: 30px;
+            background-color: #66afe9;
+            text-align: center;
+            line-height: 30px;
+            border-radius: 6px;
+        }
+        #return >a{
+            text-decoration: none;
+            color: white;
+        }
+    </style>
+    <title>登顶科技</title>
+</head>
+<body>
+    <div class="container" style="margin-top: 200px">
+        <div class="text-center" style="margin-left: 200px">
+            <a href="{% url 'role_list' %}">
+                <img src="/static/img/error_page.png" id="err_icon" alt="">
+            </a>
+            <p class="d">对不起~! 当前用户不存在，返回用户列表页重新选择</p>
+            <p id="return">
+                <a href="{% url 'menu_list' %}" >返回</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

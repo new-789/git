@@ -1,0 +1,86 @@
+
+.menu_bar {
+    width: 254px;
+    position: absolute;
+    top: 53px;
+    bottom: 0;
+    float: left;
+    padding-left: 5px;
+    background-color: #eee;
+}
+
+/* CRM 一级菜单 CSS */
+.icon_wrap {
+    font-size: 15px;
+    padding: 10px 13px;
+}
+
+.menu {
+    width: 250px;
+    height: 100%;
+    border-right: 1px solid #ccc;
+}
+
+.item > .first_menu {
+    width: 246px;
+    height: 35px;
+    cursor: pointer;
+    line-height: 35px;
+    text-align: center;
+    color: #1b6d85;
+    background-color: #eee;
+    /*margin-bottom: 2px;*/
+    border: 1px solid #ccc;
+}
+
+.item > .first_menu:hover {
+    width: 246px;
+    background-color: gold;
+    color: blueviolet;
+    border-left: 2px solid dodgerblue;
+}
+
+/* CRM 二级菜单 css */
+.item > .multi_menu > li {
+    width: 248px;
+    height: 25px;
+    margin-bottom: 2px;
+    text-align: center;
+}
+
+.action {
+    line-height: 25px;
+    padding: 3px 70px;
+    background-color: blanchedalmond;
+    border-right: 2px solid blue;
+}
+
+.item > .multi_menu li:hover {
+    background-color: blanchedalmond;
+}
+
+/* crm 页面主体导航条 CSS*/
+.homepage_title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 35px;
+    background-color: #eee;
+}
+
+.homepage_title > li {
+    float: left;
+    margin-left: 15px;
+    font-size: 15px;
+    line-height: 35px;
+    font-weight: bold;
+}
+
+li {
+    list-style: none;
+}
+
+.activation {
+    color: #5e5e5e;
+}

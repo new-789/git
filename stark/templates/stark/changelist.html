@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block css %}
+    <style type="text/css">
+        .add_search {
+            padding: 5px 0;
+        }
+        .whole{
+            float: left;
+            padding: 4px 8px;
+            margin-top: 3px;
+            font-weight: bold;
+        }
+        .others{
+            margin-left: 52px;
+        }
+        .others a{
+            display: inline-block;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            font-size: 12px;
+            margin: 3px;
+            font-weight: bold;
+        }
+        .others a:hover{
+            padding: 5px 10px;
+            background-color: #2aabd2;
+            color: white;
+            text-decoration: none;
+        }
+        .others .active{
+            padding: 5px 10px;
+            background-color: #2aabd2;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="add_search">
+        {% if search_group_row %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-space-shuttle"></i>
+                    快速筛选
+                </div>
+                <div class="panel-body">
+                    {% for row in search_group_row %}
+                        <!-- row 是 QuerySet 或 tuple 在后端进行数据的处理-->
+                        <div class="choices">
+                            {% for field in row %}
+                                {{ field|safe }}
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        <!-- 判断如果 search_list 列表中有值则显示按钮-->
+        {% if search_list %}
+            <div class="pull-right">
+                <form method="GET" class="form-inline">
+                    <div class="form-group">
+                        <!-- value 作用用来保留搜索条件 -->
+                        <input type="text" class="form-control" name="search"
+                               value="{{ search_value }}" placeholder="关键字搜索">
+                        <button class="btn btn-info" type="submit">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            {% if action_dict %}
+                <div style="float: left; margin-left: 0; margin-right: 10px">
+                    <div class="form-inline">
+                        <select class="form-control" name="active">
+                            <option value="">请选择操作</option>
+                            {% for func_name, func_text in action_dict.items %}
+                                <option value="{{ func_name }}">{{ func_text }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="submit" value="执行" class="btn btn-info" style="padding: 5px 10px;">
+                    </div>
+                </div>
+            {% endif %}
+            <!-- 判断如果 add_btn 为真则显示按钮-->
+            {% if add_btn %}
+                {{ add_btn|safe }}
+            {% endif %}
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    {% for item in header_list %}
+                        <th>{{ item }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for row in body_list %}
+                    <tr>
+                        {% for ele in row %}
+                            <td>{{ ele }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </form>
+    </div>
+
+    <nav>
+        <ul class="pagination">
+            {{ pager.page_html|safe }}
+        </ul>
+    </nav>
+{% endblock %}

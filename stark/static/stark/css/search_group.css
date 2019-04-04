@@ -1,0 +1,52 @@
+
+
+body{
+    background-color: #ccc;
+}
+/* 导航条 CSS */
+.navbar{
+    background-color: cornflowerblue;
+}
+.index_title{
+    font-size: 25px;
+    font-weight: bold;
+    padding-left: 30px;
+    line-height: 15px;
+}
+.menu_title > li > a{
+    padding: 30px 30px 0 0;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* */
+.menu_panel{
+    padding-top: 30px;
+}
+#customer_icon{
+    width: 200px;
+    height: 200px;
+    border-radius: 150px;
+    margin-bottom: 10px;
+}
+#order_icon{
+    width: 200px;
+    height: 200px;
+    border-radius: 150px;
+    margin-bottom: 10px;
+}
+#customer_text{
+    margin-left: 70px;
+}
+#order_text{
+    margin-left: 70px;
+}
+#bill_icon{
+    width: 200px;
+    height: 200px;
+    border-radius: 150px;
+    margin-bottom: 10px;
+}
+#bill_text{
+    margin-left: 75px;
+}

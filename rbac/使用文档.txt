@@ -1,0 +1,401 @@
+
+
+RBAC 权限
+组件的使用文档
+    一：将 rbac 组件拷贝到项目,并在项目中的 settings.py 全局配置文件中注册 rbac app
+        注册方法：在 INSTALLED_APPS 中加上 'rbac.apps.RbacConfig'
+    二：将 rbac/migrations 目录中的数据库迁移记录删除
+
+    三、业务系统中用户表结构的设计
+        业务表结构中的用户表需要和 rbac 中的用户表有继承关系，如：
+            rbac/models.py
+                class UserInfo(models.Model):
+                    """
+                    用户信息表
+                    """
+                    uid = models.AutoField(primary_key=True)
+                    username = models.CharField(verbose_name='用户名', max_length=32)
+                    password = models.CharField(verbose_name="密码", max_length=64)
+                    email = models.CharField(verbose_name="邮箱", max_length=32)
+                    # 创建与角色表的多对多关系
+                    user_role = models.ManyToManyField(verbose_name="用户角色对应关系",
+                                                       to="Role", blank=True)
+
+                    def __str__(self):
+                        return self.username
+
+                    class Meta:
+                        """
+                        加上该方法后 django 在做数据库迁移时，将不在为 userinfo 创相关的表以及表结构，
+                        此 userinfo 类可以当做父类，可以被其它 Model 类继承
+                        """
+                        abstract = True
+
+            业务/models.py  ，用户表继承 rbac 组件中的 userinfo 类
+                class UserInfo(rbac/UserInfo):
+                    """
+                    用户表
+                    """
+                    phone = models.CharField(verbose_name='练习方式', max_length=32)
+                    # 定义自己需要增加的字段
+                    level_choices = {
+                        (1, 'T1'),
+                        (2, 'T2'),
+                        (3, 'T3')
+                    }
+                    level = models.IntegerField(verbose_name='级别', choices=level_choices)
+                    depart = models.ForeignKey(verbose_name='拥有的部门', to='Department',
+                                                on_delete=models.CASCADE)
+
+                    def __str__(self):
+                        return self.user.username
+            优点：将所有的用户信息放入到一张表中(业务的用户表)，对用户信息表的维护会很方便
+            缺点：在 rbac 组件中所有的关于用户操作，不能在使用了
+            注：rbac 组件中有两处使用了用户表
+                —— rbac 组件中有关用户管理 url 。[删除]
+                —— 权限分配时用户列表。[读取业务中的用户表即可]
+            重点提醒：如在其它应用中的 userinfo 表继承了 rbac 组件中的
+                     userinfo 表，那么在做数据库迁移前，需将用户管理角色的多对多关系中的 to='Role'
+                     所带的引号去掉，让其把 rabc 中创建的 Role 表的内存地址一样继承过去，
+                     否则无法做数据库迁移操作。
+             对于 rbac 中的代码修改：
+                —— 在 rbac 组件中的 urls 中将用户表的增删改查和修改密码功能注释掉或删除
+                —— 在 rbac 组件 menu.py 视图函数中权限分配功和自定义 froms 中的 user .py 关于用户表操作的能时，
+                   读取用户表变成通过配置文件来进行指定并导入使用
+                   方法：
+                        1、在 settings.py 文件中配置的配置的用户表为：
+                          RBAC_USER_MODEL_CLASS = '业务应用名.models.UserInfo'
+                        2、在 menu.py 文件中导入也去应用中的配置文件及 import_string 方法
+                        3、使用 import_string 方法获取配置文件中的用户表
+                           方法：user_model_class = import_string(settings.RBAC_USER_MODEL_CLASS)
+
+    四、将业务系统中的用户表的路径写到配置文件
+        业务中有关用户表(rbac组件下的 views 视图文件中的 menu.py 文件中权限分配操作处，
+        及 rbac 组件 forms 中 user.py 文件中，做以下操作)
+            1、如在 settings.py 文件中配置的配置的用户表为：
+              RBAC_USER_MODEL_CLASS = '业务应用名.models.UserInfo'
+              用于在 rbac 分配权限时，读取业务表中的用户信息
+            2、在 menu.py 文件中导入也去应用中的配置文件及 import_string 方法,及 settings 文件
+                语法：
+                from django.conf import settings
+                from django.utils.module_loading import import_string
+            3、使用 import_string 方法获取配置文件中的用户表
+               方法：user_model_class = import_string(settings.RBAC_USER_MODEL_CLASS)
+            4、将 rbac 组件中的 views 视图中文件中的 menu.py 的权限分配视图函数
+               distribute_permission 中用到 models.UserInfo 的内容更改为 user_model_class
+
+    五、业务逻辑开发
+        ——、将所有的路由都设置一个 name 属性(即别名属性) 如：
+            path('admin/', admin.site.urls),
+
+            path('index/', account.index, name='index'),
+
+            path('login/', account.login, name='login'),
+            path('logout/', account.logout, name='login'),
+
+            re_path(r'^user/list/$', user.user_list, name='user_list'),
+            re_path(r'^user/add/$', user.user_add, name='user_add'),
+            re_path(r'^user/edit/(?P<id>\d+)$', user.user_edit, name='user_edit'),
+            re_path(r'^user/reset/password/(?P<id>\d+)$', user.user_reset_pwd, name='user_reset_pwd'),
+            re_path(r'^user/del/(?P<id>\d+)$', user.user_del, name='user_del'),
+
+            re_path(r'^host/list/$', host.host_list, name='host_list'),
+            re_path(r'^host/add/$', host.host_add, name='host_add'),
+            re_path(r'^host/edit/(?P<id>\d+)$', host.host_edit, name='host_edit'),
+            re_path(r'^host/del/(?P<id>\d+)$', host.host_del, name='host_del'),
+        用于反向生成 URL，以及粒度控制到按钮的权限控制
+
+    六、权限信息录入
+         —— 在根路由的 url 中添加 rbac 的路由分发， 如下：
+            urlpatterns = [
+                …………
+                path('rbac/', include('rbac.urls'))
+            ]
+        —— 相关配置：自动发现 url 时，排除的 url
+            AUTO_DISCOVER_EXCLUDE = [
+                '/admin/.*',
+                '/login/',
+                '/logout/',
+                '/register/',
+            ]
+         —— rabc 组件提供的地址进行操作(登录前必须先取消 rbac 中间件)，地址如下：
+            —— http://127.0.0.1:8000/rbac/menu/list/
+            —— http://127.0.0.1:8000/rbac/role/list/
+            —— http://127.0.0.1:8000/rbac/multi/permissions/
+
+
+######################## 以上操作完成后方可执行以下步骤 ######################
+    七、编写用户登录逻辑(进行权限初始化)，如：
+        def login(request):
+            """
+            用户登录
+            :param request:
+            :return:
+            """
+            if request.method == 'GET':
+                return render(request, 'login.html')
+            username = request.POST.get('username')
+            pwd = request.POST.get('pwd')
+            user_obj = models.UserInfo.objects.filter(username=username, password=pwd).first()
+            if not user_obj:
+                return render(request, 'login.html', {'error': '用户名或密码错误'})
+            # 登录成功做用户权限信息的初始化
+            在用户登录视图函数模块引入 init_permission 模块并做以下设置
+            导入方法 from rbac.service.init_permission import init_permission
+            init_permission(user_obj, request)
+            return redirect('/index/')
+        init_permission 权限初始化函数中相关的修改：权限和 session key
+            注：使用方式二后需在中间件更改为如下内容：
+                    import re
+                    from django.utils.deprecation import MiddlewareMixin  # 导入中间件父类
+                    from django.shortcuts import render
+                    from django.conf import settings
+
+                    class RbacMiddleware(MiddlewareMixin):
+                        """
+                        自编译中间件，可以在用户发送请求时在中间件完成
+                        用于用户权限信息的校验,
+                        注：写完中间件需要将自己写的中间件添加到在 settings 文件中的 middleware 中
+                        """
+
+                        def process_request(self, request):
+                            """
+                            process_request 用户请求时触发执行
+                            1、获取的行前用户请求的 url
+                            2、获取当前用户在 session 中保存的权限(即 url )
+                            3、使用正则进行用户权限信息的匹配
+                            :return:
+                            """
+                            current_url = request.path_info  # 获取 url 中地址方法
+                            # 设置白名单，使其中间件对在白名单中的 url不进行权限校验
+                            for white_url in settings.WHITE_LIST:
+                                # 为确保多个 url 无需验证
+                                if re.match(white_url, current_url):
+                                    return None  # 返回 None 表示不拦截执行到下一个中间件或后面的 url
+
+                            # 获取 session 保存的权限(即url)
+                            permission_url_dict = request.session.get(settings.PERMISSION_SESSION_KEY)
+                            if not permission_url_dict:
+                                # 未获取到用户权限信息错误及登录页面
+                                return render(request, 'rbac/user_permission_info.html')
+
+                            url_record = [
+                                {'title': '首页', 'url': '#'}
+                            ]
+
+                            # 此处代码进行判断(需要登录无需通过权限校验)：如果是 /login/ /login/
+                            for url in settings.NO_PERMISSION_LIST:
+                                if re.match(url, request.path_info):
+                                    request.per_id = 0
+                                    request.homepage_title = url_record
+                                    return None
+
+                            # 用户权限匹配，
+                            state = False  # state 表示无权访问
+
+                            for item in permission_url_dict.values():  # 循环从 session 中取出来的字典数据
+                                reg = '^%s$' % item['url']
+                                if re.match(reg, current_url):
+                                    state = True  # 权限匹配成功将状态的变量更改为 True 表示可以正常访问
+                                # 给 request 请求数据中添加一个 per_id 数据方便在任何应用中获取数据
+                                    request.per_id = item['pid'] or item['id']  # 表示默认选中
+                                    # 判断如果当前id 不是 pid 即表示为主菜单
+                                    if not item['pid']:
+                                        url_record.extend([
+                                            {'title': item['title'], 'url': item['url'],
+                                             'class':'activation'}
+                                        ])
+                                    else:
+                                        url_record.extend([
+                                            {'title': item['p_title'], 'url': item['p_url']},
+                                            {'title': item['title'], 'url': item['url'],'class':'activation'},
+                                        ])
+                                        print(url_record)
+                                    request.homepage_title = url_record
+                                    break
+                            # not state 等于 False 取反为 true 即没有匹配成功没有更改 state 状态为 true
+                            if not state:
+                                return render(request, 'rbac/permission_error.html')
+        相关配置：权限和菜单的 session key:
+            settings.py 中增加如下两行配置
+                # 权限在 session 中存储的 key
+                PERMISSION_SESSION_KEY = "dd_permission_url_list_key"
+                # 菜单在 session 中存储的 key
+                MENU_SESSION_KEY = "menu_session_list_key"
+
+    八、编写一个首页的逻辑
+        def index(request):
+            """
+            首页
+            :param request:
+            :return:
+            """
+            return render(request, 'index.html')
+        相关的配置：
+            # 需要登录但无需权限的 url
+            NO_PERMISSION_LIST = [
+                '/index/',
+                '/logout/',
+            ]
+
+    九、中间件进行权限校验和白名单
+        权限校验
+        MIDDLEWARE = [
+                'django.middleware.security.SecurityMiddleware',
+                'django.contrib.sessions.middleware.SessionMiddleware',
+                'django.middleware.common.CommonMiddleware',
+                'django.middleware.csrf.CsrfViewMiddleware',
+                'django.contrib.auth.middleware.AuthenticationMiddleware',
+                'django.contrib.messages.middleware.MessageMiddleware',
+                'django.middleware.clickjacking.XFrameOptionsMiddleware',
+                'rbac.my_middleware.rbac.RbacMiddleware', #中间件的应用
+            ]
+        白名单的处理，无需登录即可访问(在 settings.py 文件中添加一下配置，地址可自定义)
+            WHITE_LIST = [  # 白名单目录
+                        "/login/",
+                        "/admin/.*",
+                        ]
+
+    十：粒度到按钮级别的控制
+        使用方法：
+            在需要控制的按钮的 html 文档中做 if 判断，并调用 rbac 组件中的 has_permission 函数方法，如下：
+            {% extends 'rbac/base.html' %}
+            {% load rbac %}  ---> 必须先导入 rbac
+
+            {% block title %}
+                哈哈
+            {% endblock %}
+
+            {% block content %}
+               <div class="dd-container">
+                    <div class="btn-group" style="margin: 5px 0">
+                        {% if request|has_permission:'user_add' %}
+                            <a class="btn btn-info" href="{% memory_url request 'user_add' %}">
+                                <i class="fa fa-plus-square" aria-hidden="true">&nbsp;&nbsp;添加用户</i>
+                            </a>
+                        {% endif %}
+                    </div>
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>用户名</th>
+                                <th>手机号</th>
+                                <th>邮箱</th>
+                                <th>级别</th>
+                                <th>部门</th>
+                                {% if request|has_permission:'user_reset_password' %}
+                                    <th>重置密码</th>
+                                {% endif %}
+                                {% if request|has_permission:'user_edit' or request|has_permission:'user_del' %}
+                                    <th>选项</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td> <!-- 模板序号循环自加语法-->
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.phone }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.get_level_displayl }}</td>
+                                    <td>{{ user.depart.title }}</td>
+                                    <td>
+                                        {% if request|has_permission:'user_reset_password' %}
+                                            <a class="fa fa-refresh" href="{% memory_url request 'user_reset_pwd' id=user.uid %}"
+                                               style="text-decoration: none;">
+                                            &nbsp;重置密码
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                    {% if request|has_permission:'user_edit' or request|has_permission:'user_del' %}
+                                        <td>
+                                            {% if request|has_permission:'user_edit' %}
+                                                <a class="fa fa-edit" href="{% memory_url request 'user_edit' id=user.uid %}"
+                                                   style="color: #333;"></a>
+                                            {% endif %}
+                                            |
+                                            {% if request|has_permission:'user_del' %}
+                                                <a class="fa fa-trash" href="{% memory_url request 'user_del' id=user.uid %}"
+                                                   style="color: #d9534f"></a>
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+               </div>
+            {% endblock %}
+        —— 粒度到按钮级别的控制
+
+
+    总结：目的是希望在任意系统中应用权限系统
+        —— 用户登录，用户首页，用户注销，用户注册等(需自己写)
+        —— 项目业务逻辑开发
+            注：开发时灵活的取设置 rabc 组件中的 base.html 模板及 inclusion_tag
+                <div class="menu_bar pull-left">
+                    <!-- 引入 rebc 组件中的 rbac 模块中的 multi_menu 函数 并传参-->
+                    {#    {% static_menu request %}#}  ---> 针对一级菜单，开发时去掉，上线时取回
+                    {% multi_menu request %} ---> 针对二级菜单，开发时去掉，上线时取回
+                </div>
+                <div class="homepage_nav">
+                    <div class="homepage_title">
+                        <!-- 引入 rebc 组件中的 rbac 模块中的 homepage_nav 函数 并传参-->
+                        {% homepage_nav request %} ---> 导航条，开发时去掉，上线时取回
+                    </div>
+                    <div class="info_display">
+                        {% block content %}{% endblock %}
+                    </div>
+                </div>
+        —— 权限信息的录入，用 rbac 中的权限管理即可
+        —— 配置文件
+            注册 rbac 组件 app
+            INSTALLED_APPS = [
+                …………
+                'rbac.apps.RbacConfig',
+            ]
+             中间件
+            MIDDLEWARE = [
+                …………
+                'rbac.my_middleware.rbac.RbacMiddleware', #中间件的应用
+            ]
+
+            ###########################  用户权限的相关配置 ###########################
+            # 业务中的用户表
+            RBAC_USER_MODEL_CLASS = 'app01.models.UserInfo'
+
+
+            ################## 权限相关的配置 ################
+            # 权限在 session 中存储的 key
+            PERMISSION_SESSION_KEY = "dd_permission_url_list_key"
+            # 菜单在 session 中存储的 key
+            MENU_SESSION_KEY = "menu_session_list_key"
+            # 白名单目录
+            WHITE_LIST = [
+                        "/login/",
+                        # "/logout/",
+                        # "static/.*",
+                        "/admin/.*",
+                        ]
+
+
+            # 需要登录但无需权限的 url
+            NO_PERMISSION_LIST = [
+                '/index/',
+                '/logout/',
+            ]
+
+            # 用户相关配置
+            MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+            MEDIA_URL = '/media/'
+
+
+            # 自动发现路由中所有 URL 排除 URL 设置
+            AUTO_DISCOVER_EXCLUDE = [
+                '/admin/.*',
+                '/login/',
+                '/logout/',
+                '/register/',
+            ]

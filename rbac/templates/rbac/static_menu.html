@@ -1,0 +1,14 @@
+<!-- 一级菜单模板-->
+<div class="col-md-1 col-sm-2 list-group menu_list">
+    {% for item in menu_list.value %}
+        <div class="list-group-item">
+            <a href="{{ item.url }}" class="active">
+                <span class="icon_wrap">
+                    <i class="fa {{ item.icon }}">
+                        {{ item.title }}
+                    </i>
+                </span>
+            </a>
+        </div>
+    {% endfor %}
+</div>

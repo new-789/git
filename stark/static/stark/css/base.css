@@ -1,0 +1,51 @@
+
+body{
+    clear: both;
+}
+*{
+    padding: 0;
+    margin: 0;
+}
+.navbar{
+    background-color: dodgerblue;
+}
+#Brand{
+    width: 45px;
+    height: 45px;
+    border-radius: 25px;
+    margin-top: -13px;
+}
+.navbar-default .navbar-nav > li > a {
+    color: white;
+}
+.navbar-nav > li > a{
+    padding-left: 15px;
+    padding-top: 25px;
+    padding-bottom: 0;
+}
+
+
+/* 页面主体 CSS*/
+.homepage_nav{  /* 主体框架*/
+    position: absolute;
+    left: 250px;
+    right: 0;
+    bottom: 0;
+    top: 51px;
+    /*margin-left: 5px;*/
+    padding: 0 15px;
+}
+
+.menu_bar{
+    width: 254px;
+    position: absolute;
+    top: 53px;
+    bottom: 0;
+    float: left;
+    padding-left: 5px;
+    border-right: 1px solid #ccc;
+    background-color: #eee;
+}
+.info_display{
+    margin-left: 10px;
+}

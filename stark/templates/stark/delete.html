@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    登顶科技
+{% endblock %}
+
+
+{% block content %}
+    <!-- style="background-color:#f0d8dc;border-radius: 8px"-->
+    <div class="container-fluid"  style="background-color:#f0d8dc;border-radius: 8px;margin-top: 15px">
+        <form method="post">
+            {% csrf_token %}
+            <!-- style="color: red;margin-top: 15px;"-->
+            <span class="fa fa-exclamation-triangle"  style="color: red;margin-top: 15px;">
+                &nbsp;删除后将不可恢复，确认是否删除？
+            </span>
+            <p style="margin-top: 20px;">
+                <!-- cancel 模板中定义变量语法，通常用在多个页面用同一个模板做跳转时使用，
+                变量的内容由视图函数中传过来 -->
+                <a href="{{ cancel }}" class="btn btn-default">取消</a>
+                <input  type="submit" class="btn btn-danger" value="确 认">
+            </p>
+        </form>
+    </div>
+{% endblock %}

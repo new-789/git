@@ -1,0 +1,18 @@
+
+.navbar{
+    background-color: cornflowerblue;
+}
+.reg_menu{
+    margin-top: 30px;
+    margin-right: 100px;
+    float: right;
+}
+.reg_index{
+    color: white;
+}
+.index_ico{
+    color: white;
+    position: absolute;
+    top: 31px;
+    right: 243px;
+}

@@ -1,0 +1,43 @@
+{% extends 'rbac/base.html' %}
+
+{% block title %}
+    登顶科技
+{% endblock %}
+
+{#{% block menu %}#}
+{##}
+{#{% endblock %}#}
+
+{% block content %}
+   <div class="dd-container">
+        <div class="btn-group" style="margin: 5px 0">
+            <a class="btn btn-info" href="{% url 'role_add' %}">
+                <i class="fa fa-plus-square" aria-hidden="true">&nbsp;&nbsp;添加角色</i>
+            </a>
+        </div>
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>名称</th>
+                    <th>选项</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for role in roles %}
+                    <tr>
+                        <td>{{ role.rid }}</td>
+                        <td>{{ role.role }}</td>
+                        <td>
+                            <a class="fa fa-edit" href="{% url 'role_edit' id=role.rid %}"
+                               style="color: #333;"></a>
+                            |
+                            <a class="fa fa-trash" href="{% url 'role_del' id=role.rid %}"
+                               style="color: #d9534f"></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+   </div>
+{% endblock %}

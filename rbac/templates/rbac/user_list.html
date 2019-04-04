@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    登顶科技
+{% endblock %}
+
+{#{% block menu %}#}
+{##}
+{#{% endblock %}#}
+
+{% block content %}
+   <div class="dd-container">
+        <div class="btn-group" style="margin: 5px 0">
+            <a class="btn btn-info" href="{% url 'user_add' %}">
+                <i class="fa fa-plus-square" aria-hidden="true">&nbsp;&nbsp;添加用户</i>
+            </a>
+        </div>
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>用户名</th>
+                    <th>手机号</th>
+                    <th>邮箱</th>
+                    <th>重置密码</th>
+                    <th>选项</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td> <!-- 模板序号循环自加语法-->
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.telephone }}</td>
+                        <td>{{ user.email }}</td>
+                        <td><a class="fa fa-refresh" href="{% url 'user_reset_pwd' id=user.uid %}"
+                               style="text-decoration: none;">
+                            &nbsp;重置密码
+                            </a>
+                        </td>
+                        <td>
+                            <a class="fa fa-edit" href="{% url 'user_edit' id=user.uid %}"
+                               style="color: #333;"></a>
+                            |
+                            <a class="fa fa-trash" href="{% url 'user_del' id=user.uid %}"
+                               style="color: #d9534f"></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+   </div>
+{% endblock %}

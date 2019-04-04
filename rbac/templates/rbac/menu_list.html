@@ -1,0 +1,187 @@
+{% extends 'rbac/base.html' %}
+{% load rbac %}
+
+{% block css %}
+    <style type="text/css">
+        tr.active {
+            border-left: 2px solid #eb9316;
+            background-color: #eee;
+        }
+    </style>
+{% endblock %}
+
+{% block title %}
+    登顶科技
+{% endblock %}
+
+{% block content %}
+    <div class="dd-container">
+        {#    <!----------------- 一级菜单面板 ----------------------------------- >#}
+        <div class="col-md-3 col-sm-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-map-o"></i>
+                    一级菜单
+                    <a class="pull-right btn btn-success" href="{% memory_url request 'menu_add' %}"
+                       style="width: 80px; height: 26px; line-height: 15px;margin-top: -3px">
+                        <i class="fa fa-plus"></i>
+                        &nbsp;&nbsp;新建
+                    </a>
+                </div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>名称</th>
+                        <th>图标</th>
+                        <th>选项</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for menu in menus %}
+                        <!-- class 使用 if 判断增加类名方法 safe 则直接可以将整数类型的数据转换为
+                             str 类型 -->
+                        <tr class="{% if menu.id|safe == menu_id %}active{% endif %}">
+                            <td>
+                                <a href="?mid={{ menu.id }}">
+                                    {{ menu.title }}
+                                </a>
+                            </td>
+                            <td>
+                                <i class="fa {{ menu.icon }}"></i>
+                            </td>
+                            <td>
+                                <a class="fa fa-edit"
+                                   href="{% memory_url request 'menu_edit' id=menu.id %}"
+                                   style="color: #333;"></a>
+                                |
+                                <a class="fa fa-trash"
+                                   href="{% memory_url request 'menu_del' id=menu.id %}"
+                                   style="color: #d9534f"></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {#    <!----------------- 二级菜单面板 ----------------------------------- >#}
+        <div class="col-md-4 col-sm-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-book"></i>
+                    二级菜单
+                    {% if menu_id %}  <!-- 判断 如果 menu_id 存在则显示新建-->
+                        <a class="pull-right btn btn-success"
+                           href="{% memory_url request 'second_menu_add' menu_id=menu_id %}"
+                           style="width: 80px; height: 26px; line-height: 15px;margin-top: -3px">
+                            <i class="fa fa-plus"></i>
+                            &nbsp;&nbsp;新建
+                        </a>
+                    {% endif %}
+                </div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>名称</th>
+                        <th>别名 & URL</th>
+                        <th>选项</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for menu in second_menus %}
+                        <!-- class 使用 if 判断增加类名方法 safe 则直接可以将整数类型的数据转换为
+                             str 类型 -->
+                        <tr class="{% if menu.pid|safe == second_menu_id %}active{% endif %}">
+                            <td rowspan="2">
+                                <a href="?mid={{ menu_id }}&sid={{ menu.pid }}">
+                                    {{ menu.title }}
+                                </a>
+                            </td>
+                            <td>
+                                {{ menu.url_alias }}
+                            </td>
+                            <td>
+                                <a class="fa fa-edit" href="{% memory_url request 'second_menu_edit' id=menu.pid %}"
+                                   style="color: #333;"></a>
+                                |
+                                <a class="fa fa-trash" href="{% memory_url request 'second_menu_del' id=menu.pid %}"
+                                   style="color: #d9534f"></a>
+                            </td>
+                        </tr>
+                        <tr class="{% if menu.pid|safe == second_menu_id %}active{% endif %}">
+                            <!-- colspan 属性为横向合并单元格方法,rowspan 属性表示竖向合并单元格，
+                                 值为几则表示合并几个单元格，且给 td 标签设置 border-top 为 0 值
+                                 则去掉上边框的横线-->
+                            <td colspan="2" style="border-top: 0;">{{ menu.url }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {#    <!------------------ 三级菜单面板 ----------------------------------->#}
+        <div class="col-md-5 col-sm-5">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-magic"></i>
+                    权限
+                    <div class="btn-group pull-right">
+                        {% if second_menu_id %}  <!-- 判断 如果 second_menu_id 存在则显示新建-->
+                            <a class=" btn btn-success"
+                               href="{% memory_url request 'permission_add' second_menu_id=second_menu_id %}"
+                               style="width: 80px; height: 26px; line-height: 15px;margin-top: -3px">
+                                <i class="fa fa-plus"></i>
+                                &nbsp;&nbsp;新建
+                            </a>
+                        {% endif %}
+                        <a class="btn btn-primary"
+                           href="{% memory_url request 'multi_permission' %}"
+                           style="width: 108px; height: 26px; line-height: 15px;margin-top: -3px;">
+                            <i class="fa fa-paper-plane-o"></i>
+                            &nbsp;&nbsp;批量操作
+                        </a>
+                    </div>
+                </div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>名称</th>
+                        <th>别名 & URL</th>
+                        <th>选项</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for menu in permissions %}
+                        <!-- class 使用 if 判断增加类名方法 safe 则直接可以将整数类型的数据转换为
+                             str 类型 -->
+{#                        class="{% if menu.pid|safe == second_menu_id %}active{% endif %}#}
+                        <tr>
+                            <td rowspan="2">
+{#                                <a href="?mid={{ menu_id }}&sid={{ menu.pid }}">#}
+                                    {{ menu.title }}
+{#                                </a>#}
+                            </td>
+                            <td>
+                                {{ menu.url_alias }}
+                            </td>
+                            <td>
+                                <a class="fa fa-edit" href="{% memory_url request 'permission_edit' id=menu.pid %}"
+                                   style="color: #333;"></a>
+                                |
+                                <a class="fa fa-trash" href="{% memory_url request 'permission_del' id=menu.pid %}"
+                                   style="color: #d9534f"></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <!-- colspan 属性为横向合并单元格方法,rowspan 属性表示竖向合并单元格，
+                                 值为几则表示合并几个单元格，且给 td 标签设置 border-top 为 0 值
+                                 则去掉上边框的横线-->
+                            <td colspan="2" style="border-top: 0;">{{ menu.url }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

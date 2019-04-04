@@ -1,0 +1,100 @@
+{% load staticfiles %}
+{% load rbac %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0,
+                   maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{% static 'stark/bs/bootstrap/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'stark/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/menu.css' %}">
+    <link rel="stylesheet" href="{% static 'stark/datetimepicker/css/bootstrap-datetimepicker.css' %}">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="{% static 'stark/js/jquery-3.3.1.js' %}"></script>
+    <script src="{% static 'stark/bs/bootstrap/js/bootstrap.js' %}"></script>
+
+    {% block css %}{% endblock %}
+
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href=" ">
+                <img id="Brand" src="{% static 'stark/img/logo.png' %}">
+            </a>
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#" style="color: white;font-weight: bold;font-size: 25px;">
+                CF_CRM system
+            </a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="#">资产管理 <span class="sr-only">(current)</span></a></li>
+                <li><a href="#">用户信息</a></li>
+                <li><a href="#"></a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">使用说明 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">系统介绍</a></li>
+                        <li><a href="#">使用说明</a></li>
+                        <li><a href="#">不知道什么了</a></li>
+                        <li><a href="#">联系我们</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">当前用户: {{ request.session.user_info.nickname }}</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">选项 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">个人中心</a></li>
+                        <li><a href="#">资料修改</a></li>
+                        <li><a href="#">使用帮助</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="/logout/">退出登录</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="menu_bar pull-left">
+    {% multi_menu request %}
+</div>
+<div class="homepage_nav">
+    {% homepage_nav request %}
+    <div class="info_display">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+<script src="{% static 'rbac/js/rbac.js' %}"></script>
+<script src="{% static 'stark/datetimepicker/js/bootstrap-datetimepicker.js' %}"></script>
+<script src="{% static 'stark/datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js' %}"></script>
+<script>
+    $('.form_date').datetimepicker({
+        minView: 'month',  // 表示最小开始时间
+        language: 'zh-CN',  // 表示使用中文
+        sideBySide: true,
+        format: 'yyyy-mm-dd',  // 选择后在input框中的日期格式
+        bootcssVer: 3,  // bootstrap 版本
+        startDate: new Date(),  // 其实时间，表示当前时间
+        autoclose: true,  // 选择时间后是否马上关闭时间展示框
+        pickerPosition: 'bottom-left',
+    });
+</script>
+{% block js %}{% endblock %}
+</body>
+</html>

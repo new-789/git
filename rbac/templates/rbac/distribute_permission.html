@@ -1,0 +1,217 @@
+{% extends 'rbac/base.html' %}
+{% load rbac %}
+
+{% block css %}
+    <style type="text/css">
+        .root {
+            height: 30px;
+            background-color: #afd9ee;
+            font-size: 14px;
+        }
+        .select-help:hover{
+            text-decoration: underline color(red);
+        }
+        .check-all {
+            float: right;
+            margin-top: -21px;
+            line-height: 25px;
+        }
+        {#  二级菜单 CSS #}
+        .second_info{
+            margin-top: 8px;
+            font: 16px Arial, 宋体 ;
+        }
+        {#  三级菜单 CSS #}
+        .three_menu{
+            margin-left: 25px;
+            margin-top: 3px;
+            font-size: 12px;
+        }
+        .three_menu input{
+            margin-left: 12px;
+        }
+        {#  用户默认选中 CSS #}
+        .user_area li{
+            cursor: pointer;
+            padding: 2px 0;
+        }
+        .user_area li a{
+            display: block;
+        }
+        .user_area li.select{
+            font-weight: bold;
+            color: red;
+        }
+        .user_area li.select a{
+            color: red;
+        }
+        {# 角色信息默认选中样式 #}
+        tr.role_active a{
+            font-weight: bold;
+            color: red;
+        }
+        tr.role_active{
+            background-color: #eee;
+            border-left: 2px solid #f0ad4e;
+        }
+    </style>
+{% endblock %}
+
+
+{% block title %}
+    登顶科技
+{% endblock %}
+
+
+{% block content %}
+    <!------------------- 用户信息展示面板 ------------------->
+    <div class="col-ms-3 col-sm-3">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <i class="fa fa-address-book-o"></i>
+                &nbsp;&nbsp;用户信息
+            </div>
+            <div class="panel-body user_area">
+                    <ul>
+                        {% for user in user_obj %}
+                            <li style="text-align: center" class="{% if user.uid|safe == user_id %}select{% endif %}">
+                                <a href="?uid={{ user.uid }}">
+                                    {{ user.username }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+            </div>
+        </div>
+    </div>
+    <!------------------- 角色信息展示面板 ------------------->
+    <div class="col-md-3 col-sm-3">
+        <form method="post">
+            {% csrf_token %}
+            <!-- 隐藏的input标签用以区分提交数据的内容 -->
+            <input type="hidden" name="type" value="role">
+            <div class="panel panel-info">
+            <div class="panel-heading">
+                <i class="fa fa-book"></i>
+                &nbsp;&nbsp;角色信息
+                {% if user_id %}
+                    <button class="btn btn-success btn-xs pull-right">
+                        <i class="fa fa-save"></i>
+                        &nbsp;保存
+                    </button>
+                {% endif %}
+            </div>
+            <div class="panel-body" style="color: #ccc">提示：点击用户后显示默认角色并能为其分配其它角色</div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>角色</th>
+                    <th>选项</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for role in role_obj %}
+                    <tr  class="{% if role.rid|safe == role_id %}role_active{% endif %}">
+                        <td>
+                            {% if user_id %}
+                                <a href="?uid={{ user_id }}&rid={{ role.rid }}">{{ role.role }}</a>
+                            {% else %}
+                                <a href="?rid={{ role.rid }}">{{ role.role }}</a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <!-- 判断，如果用户 id 如果存在后台传过来的字典中则给 input 标签
+                                 加上 checked 属性，表示默认选中-->
+                            <input type="checkbox" name="roles" value="{{ role.rid }}"
+                                    {% if role.rid in user_has_roles_dict %}checked{% endif %}>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        </form>
+    </div>
+    <!------------------- 权限信息展示面板 ------------------->
+    <div class="col-md-6 col-sm-6 permission_area">
+        <form method="post">
+            {% csrf_token %}
+            <!-- 隐藏的input标签用以区分提交数据的内容 -->
+            <input type="hidden" name="type" value="permission">
+            <div class="panel panel-warning">
+            <div class="panel-heading">
+                <i class="fa fa-sitemap"></i>
+                &nbsp;&nbsp;权限分配
+                {% if role_id %}
+                    <button class="btn btn-success btn-xs pull-right">
+                        <i class="fa fa-save"></i>
+                        &nbsp;保存
+                    </button>
+                {% endif %}
+            </div>
+            <div class="panel-body" style="color: #c0a16b;margin-left: 20px;">
+                提示：选择角色后方可进行权限分配操作，不支持直接给用户分配权限
+            </div>
+            <table class="table">
+                <tbody>
+                {% for item in all_menu_list %}
+                    <tr class="root">
+                        <td>
+                            <i class="fa fa-bars" aria-hidden="true"></i>
+                            {{ item.title }}
+                            <div class="select-help">
+                                <div class="check-all pull-right">
+                                    <label for="check_all_{{ item.id }}">全选</label>
+                                    <input type="checkbox" id="check_all_{{ item.id }}">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- 二级菜单显示  -->
+                    {% if item.children %}
+                        <tr class="second_menu">
+                            <td>
+                                {% for second in item.children %}
+                                    <div class="second_info">
+                                            <input id="permission_{{ second.pid }}" name="permissions"
+                                                   type="checkbox" value="{{ second.pid }}"
+                                                   {% if second.pid in user_has_permissions_dict %}checked{% endif %}>
+                                            <label for="permission_{{ second.pid }}">
+                                                {{ second.title }} (菜单)
+                                            </label>
+                                    </div>
+                                    <!-- 三级菜单显示 -->
+                                    <div class="three_menu">
+                                        {% for child in second.children %}
+                                            <input id="permission_{{ child.pid }}" name="permissions"
+                                                   type="checkbox" value="{{ child.pid }}"
+                                                   {% if child.pid in user_has_permissions_dict %}checked{% endif %}>
+                                                   <!-- 判断child.pid 如果存在 user_has_permissions_dict 中则设置给 input
+                                                   标签添加 checked 属性，表示默认选中-->
+                                            <label for="child_{{ child.pid }}">{{ child.title }}</label>
+                                        {% endfor %}
+                                    </div>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript">
+        $(function () {  // 表示页面武全部加载完毕
+            /* change 表示点击改变事件操作 */
+           $('.check-all input:checkbox').change(function () {
+               /* parents 表示往上查找父级，参数则表示找到什么内容为止,然后找到下级的所有 checkbox 内容
+                * 并设置其下所有 checkbox 的值与当前点击的 checkbox 值一致*/
+               $(this).parents('.root').next().find(':checkbox').prop('checked', $(this).prop('checked'))
+           }); 
+        });
+    </script>
+{% endblock %}
